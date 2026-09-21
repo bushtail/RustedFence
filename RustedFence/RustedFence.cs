@@ -5,12 +5,14 @@ using SPTarkov.Common.Models.Logging;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Helpers.Server;
+using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Config;
+using SPTarkov.Server.Core.Models.Spt.Tables;
 
 namespace RustedFence;
 
 [Injectable(TypePriority = OnLoadOrder.Preload + 1), UsedImplicitly]
-public class RustedFence(FenceConfig fenceConfig, ModHelper modHelper, ISptLogger<RustedFence> logger) : IOnLoad
+public class RustedFence(FenceConfig fenceConfig, ModHelper modHelper, ISptLogger<RustedFence> logger, TemplateTable templateTable) : IOnLoad
 {
     private readonly JsonSerializerOptions _jsonSerializerOptions = new() { WriteIndented = true };
     private const string ConfigFileName = "config.jsonc";
@@ -39,6 +41,19 @@ public class RustedFence(FenceConfig fenceConfig, ModHelper modHelper, ISptLogge
                 if (config.Debug)
                 {
                     logger.Info($"Item with id { item } successfully removed from Fence's blacklist.");
+                }
+            }
+        }
+        
+        if (config.IncreaseKeyCost && config.RemoveFromBlacklist.Contains(ItemTpl.KEY_RUSTED_BLOODY))
+        {
+            var handbook = templateTable.Handbook;
+
+            foreach (var item in handbook.Items)
+            {
+                if (item.Id == ItemTpl.KEY_RUSTED_BLOODY)
+                {
+                    item.Price = 1239477;
                 }
             }
         }
